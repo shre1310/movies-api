@@ -4,31 +4,50 @@ const axios = require('axios')
 const cheerio = require('cheerio')
 const { response } = require('express')
  
-const app = express()                  //get express and all the packages that comes with and call it and saving in the 'app'
+const app = express()                  //get express and all the packages that comes with and call it and save it in the 'app'
+
+const websites = [
+    {
+        name: 'IMDb',
+        address: 'https://www.imdb.com/chart/top/'
+    },
+    {
+        name: 'Rotten Tomatoes',
+        address: 'https://editorial.rottentomatoes.com/article/the-10-scariest-horror-movies-ever/'
+    }
+]
 
 const articles = []
 
-app.get('/myname', (req, res) =>{
+websites.forEach(website => {
+    axios.get(website.address)
+        .then(response => {
+            const html = response.data
+             const $ = cheerio.load(html)
+
+             $('a:contains("the")', html).each(function () {
+                const title = $(this).text()
+                const url = $(this).attr('href')
+
+                articles.push({
+                    title,
+                    url,
+                    source: website.name
+                })
+             }) 
+        })
+})
+
+app.get('/', (req, res) =>{
     res.json("welcome")
 } )
 
 app.get('/movies', (req, res) =>{
-    axios.get('https://www.imdb.com/chart/top/')
-    .then((response) =>{
-        const html = response.data
-        // console.log(html)
-        const $ = cheerio.load(html)
+    res.json(articles)
+})
 
-        $('a:contains("of")', html).each(function () {
-            const title = $(this).text()
-            const url = $(this).attr('href')
-            articles.push({
-                title,
-                url
-            })
-        })
-        res.json(articles)
-    }).catch((err) => console.log(err) )
+app.get('/movies/:websiteId', async (req, res) =>{
+    console.log(req)
 })
 
 app.listen(PORT, () => console.log(`server running on port  ${PORT}`) )

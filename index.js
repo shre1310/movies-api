@@ -9,7 +9,7 @@ const app = express()                  //get express and all the packages that c
 const websites = [
     {
         name: 'IMDb',
-        address: 'https://www.imdb.com/chart/top/'
+        address: 'https://www.imdb.com/'
     },
     {
         name: 'Rotten Tomatoes',
